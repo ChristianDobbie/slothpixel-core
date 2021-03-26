@@ -18,15 +18,34 @@ async function getUUID(name) {
   }
 
   return cachedFunction(`uuid:${name.toLowerCase()}`, async () => {
-    const url = `https://playerdb.co/api/player/minecraft/${name}`;
+    const weightedEndpoints = {
+      'https://playerdb.co/api/player/minecraft/': 0.6,
+      'https://api.ashcon.app/mojang/v1/user/': 0.4,
+    };
+
+    let i; let j; const table = [];
+    for (i in weightedEndpoints) {
+      for (j = 0; j < weightedEndpoints[i] * 10; j++) {
+        table.push(i);
+      }
+    }
+
+    const url = table[Math.floor(Math.random() * table.length)] + name;
 
     const response = await getData(redis, url);
     if (!response) {
       throw new Error('Invalid username!');
     }
 
-    const { data } = response;
-    return data.player.raw_id;
+    if (url.startsWith('https://playerdb.co/')) {
+      const { data } = response;
+      return data.player.raw_id;
+    }
+
+    if (url.startsWith('https://api.ashcon.app/')) {
+      const { uuid } = response;
+      return removeDashes(uuid);
+    }
   }, { cacheDuration: config.UUID_CACHE_SECONDS, shouldCache: config.ENABLE_UUID_CACHE });
 }
 
