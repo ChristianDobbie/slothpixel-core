@@ -21,7 +21,6 @@ const whitelistedPaths = new Set([
   '/api', // Docs
   '/api/metadata', // Metadata
   '/api/skyblock/bazaar', // Bazaar
-  '/api/skyblock/items',
 ]);
 
 const pathCosts = {
