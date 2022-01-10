@@ -25,7 +25,7 @@ async function buildPlayer(uuid, { shouldCache = true } = {}) {
     const playerData = processPlayerData(body.player || {});
 
     if (shouldCache && config.ENABLE_DB_CACHE) {
-      cachePlayerProfile(getPlayerFields(playerData));
+      // queries.insertPlayer(uuid, playerData);
     }
 
     return playerData;
