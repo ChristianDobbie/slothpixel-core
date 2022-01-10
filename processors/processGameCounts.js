@@ -20,16 +20,14 @@ function processGameCounts(data) {
     const cleanGame = toMode(rawGame.replace(/_LOBBY/, ''), modes);
     if (data_.modes && Object.keys(data_.modes).length > 1) {
       const modes_ = {};
-      for (let [rawMode, count] of Object.entries(data_.modes)) {
+      for (const [rawMode, count] of Object.entries(data_.modes)) {
         const cleanMode = toMode(rawMode, modes);
         modes_[rawMode] = {};
         switch (rawMode) {
-          case "PARTY":
+          case "PARTY": 
             modes_[rawMode].name = "Party Games";
             break;
           case "TNTAG":
-            rawMode = "TNTTAG";
-            modes_[rawMode] = {};
             modes_[rawMode].name = "TNT Tag";
             break;
           default:
