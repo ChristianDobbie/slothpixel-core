@@ -15,7 +15,7 @@ const buildPlayerStatus = require('../store/buildPlayerStatus');
 const { getAuctions, queryAuctionId } = require('../store/queryAuctions');
 const { buildProfile } = require('../store/buildSkyBlockProfiles');
 const { buildSkyblockCalendar, buildSkyblockEvents } = require('../store/buildSkyblockCalendar');
-const buildGuild = require('../store/buildGuild');
+const { getGuildFromPlayer, getGuildFromName } = require('../store/buildGuild');
 const leaderboards = require('../store/leaderboards');
 const redis = require('../store/redis');
 const getUUID = require('../store/getUUID');
@@ -58,7 +58,9 @@ class BoostersResolver {
 }
 
 class PlayersResolver {
-  player({ player_name }) {
+  player({ player_name /* , fields */ }) {
+    // TODO: Remove 'fields' param from the /players/{player_name} route.
+    // If someone wants specific fields, they should use graphql.
     return getPlayer(player_name);
   }
 
@@ -180,15 +182,12 @@ const graphql = graphqlHTTP({
       return leaderboardsAsync(undefined, template);
     },
 
-    async guild({ player_name, populate_players }) {
-      const id = await getUUID(player_name).catch(() => null);
-      if (!id) throw new Error('Player not found');
-
-      return buildGuild('player', id, { shouldPopulatePlayers: populate_players });
+    guild({ player_name, populate_players }) {
+      return getGuildFromPlayer(player_name, populate_players);
     },
 
     guild_by_name({ guild_name, populate_players }) {
-      return buildGuild('name', guild_name, populate_players);
+      return getGuildFromName(guild_name, populate_players);
     },
 
     leaderboards(parameters) {
