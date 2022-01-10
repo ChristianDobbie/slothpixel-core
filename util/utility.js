@@ -134,14 +134,6 @@ function typeToStandardName(name) {
 }
 
 /**
- * Converts minigame types into clean names e.g. TNTGAMES => TNT Games
- */
-function typeToCleanName(name) {
-  const result = constants.game_types.find((game) => game.type_name === name)
-  return result === undefined ? name : result.clean_name
-}
-
-/**
  * Determines if a player has contributed to the development of Slothpixel
  */
 const isContributor = (uuid) => contributors.includes(uuid);
@@ -458,7 +450,6 @@ module.exports = {
   IDToStandardName,
   DBToStandardName,
   typeToStandardName,
-  typeToCleanName,
   isContributor,
   getNestedObjects,
   getPlayerFields,

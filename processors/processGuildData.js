@@ -74,7 +74,7 @@ function insertDefaultRanks(ranks, created) {
 }
 
 function getPreferredGames(games) {
-  return games.map((game) => utility.typeToCleanName(game));
+  return games.map((game) => utility.typeToStandardName(game));
 }
 
 function processMember({
@@ -150,7 +150,7 @@ function processGuildData({
     exp_history: expHistory,
     description,
     preferred_games: getPreferredGames(preferredGames),
-    ranks: insertDefaultRanks(ranks, created).sort(r => -r.priority),
+    ranks: insertDefaultRanks(ranks, created),
     members: processedMembers,
     achievements,
   };
