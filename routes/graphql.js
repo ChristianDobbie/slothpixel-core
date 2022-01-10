@@ -84,12 +84,6 @@ class PlayersResolver {
     });
   }
 
-  async profile({ player_name }) {
-    const uuid = await getUUID(player_name);
-    const [{ profile }] = await populatePlayers([{ uuid }]);
-    return profile;
-  }
-
   async status({ player_name }) {
     return buildPlayerStatus(player_name);
   }
