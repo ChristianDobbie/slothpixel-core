@@ -92,7 +92,7 @@ async function buildProfile(uuid, id = null) {
   }
 
   // eslint-disable-next-line arrow-body-style
-  const returnedProfile = await cachedFunction(`skyblock_profile:${profile_id}`, async () => {
+  returnedProfile = await cachedFunction(`skyblock_profile:${profile_id}`, async () => {
     // insertSkyBlockProfile(profile);
 
     return getProfileData(profile_id);
