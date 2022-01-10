@@ -49,8 +49,5 @@
   },
   "engines": {
     "node": ">=10"
-  },
-  "jshintConfig":{
-    "esversion": 10
   }
 }
