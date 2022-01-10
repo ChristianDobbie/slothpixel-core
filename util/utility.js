@@ -241,24 +241,24 @@ function generateJob(type, payload) {
         url: `${apiUrl}/counts?key=${apiKey}`,
       };
     },
-    guildByPlayer() {
+    findguild() {
       return {
-        url: `${apiUrl}/guild?key=${apiKey}&player=${payload.id}`,
+        url: `${apiUrl}/findguild?key=${apiKey}&byUuid=${payload.id}`,
       };
     },
-    guildByName() {
+    findguildByName() {
       return {
-        url: `${apiUrl}/guild?key=${apiKey}&name=${payload.id}`,
-      };
-    },
-    guildById() {
-      return {
-        url: `${apiUrl}/guild?key=${apiKey}&id=${payload.id}`,
+        url: `${apiUrl}/findguild?key=${apiKey}&byName=${payload.id}`,
       };
     },
     friends() {
       return {
         url: `${apiUrl}/friends?key=${apiKey}&uuid=${payload.id}`,
+      };
+    },
+    guild() {
+      return {
+        url: `${apiUrl}/guild?key=${apiKey}&id=${payload.id}`,
       };
     },
     gamecounts() {
