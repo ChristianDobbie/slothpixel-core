@@ -3,7 +3,7 @@
 /* eslint-disable camelcase */
 const pify = require('pify');
 const fs = require('fs');
-const { graphqlHTTP } = require('express-graphql');
+const graphqlExpress = require('express-graphql');
 const { buildSchema } = require('graphql');
 const filterObject = require('filter-obj');
 const { game_types: gameTypes } = require('hypixelconstants');
@@ -145,7 +145,7 @@ class SkyblockResolver {
   }
 }
 
-const graphql = graphqlHTTP({
+const graphql = graphqlExpress({
   schema: buildSchema(schema),
   graphiql: true,
   rootValue: {
