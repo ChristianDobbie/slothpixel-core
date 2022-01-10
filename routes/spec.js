@@ -1893,9 +1893,6 @@ Consider supporting The Slothpixel Project on Patreon to help cover the hosting 
                         },
                       },
                     },
-                    cute_name: {
-                      type: 'string',
-                    },
                   },
                 },
               },
