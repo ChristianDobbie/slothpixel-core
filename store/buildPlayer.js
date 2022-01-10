@@ -1,4 +1,6 @@
 /* eslint-disable consistent-return */
+const async = require('async');
+const pify = require('pify');
 const config = require('../config');
 const processPlayerData = require('../processors/processPlayerData');
 const getUUID = require('./getUUID');
@@ -23,7 +25,7 @@ async function buildPlayer(uuid, { shouldCache = true } = {}) {
     const playerData = processPlayerData(body.player || {});
 
     if (shouldCache && config.ENABLE_DB_CACHE) {
-      cachePlayerProfile(getPlayerFields(playerData));
+      // queries.insertPlayer(uuid, playerData);
     }
 
     return playerData;
@@ -54,23 +56,34 @@ async function getPlayer(name) {
   }
 }
 
-/*
-* Replaces player uuid fields with basic data
- */
-async function populatePlayers(players = []) {
-  return Promise.all(players.map(async (player) => {
-    let profile = null;
+async function populatePlayers(players) {
+  return async.map(players, async (player) => {
     const { uuid } = player;
-    delete player.uuid;
-    profile = await getPlayerProfile(uuid);
-    if (profile === null) {
-      logger.debug(`[populatePlayers] ${uuid} not found in DB, generating...`);
-      profile = getPlayerFields(await buildPlayer(uuid, { shouldCache: false }));
+    try {
+      const [profile, isCached] = await pify(getPlayerProfile, {
+        multiArgs: true,
+      })(uuid);
+      if (profile === null) {
+        logger.debug(`[populatePlayers] ${uuid} not found in DB, generating...`);
+        const newPlayer = await buildPlayer(uuid);
+        delete player.uuid;
+        const profile = getPlayerFields(newPlayer);
+        profile.uuid = uuid;
+        player.profile = profile;
+        await cachePlayerProfile(profile);
+        return player;
+      }
+      delete player.uuid;
+      player.profile = profile;
+      if (isCached) {
+        return player;
+      }
       await cachePlayerProfile(profile);
+      return player;
+    } catch (error) {
+      logger.error(error);
     }
-    player.profile = profile;
-    return player;
-  }));
+  });
 }
 
 module.exports = {

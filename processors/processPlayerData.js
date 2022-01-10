@@ -4,7 +4,7 @@ const {
   generateFormattedRank,
   colorNameToCode,
   betterFormatting,
-  typeToCleanName,
+  typeToStandardName,
   isContributor,
 } = require('../util/utility');
 const calculateLevel = require('../util/calculateLevel');
@@ -15,18 +15,17 @@ const parseQuests = require('./parseQuests');
 
 function getPlayerRank(rank, packageRank, newPackageRank, monthlyPackageRank) {
   let playerRank;
-  if (monthlyPackageRank === 'NONE') monthlyPackageRank = null;
   if (rank === 'NORMAL') {
-    playerRank = monthlyPackageRank || newPackageRank || packageRank || null;
+    playerRank = newPackageRank || packageRank || null;
   } else {
-    playerRank = rank || monthlyPackageRank || newPackageRank || packageRank || null;
+    playerRank = rank || newPackageRank || packageRank || null;
   }
 
-  if (playerRank === 'SUPERSTAR') {
+  if (playerRank === 'MVP_PLUS' && monthlyPackageRank === 'SUPERSTAR') {
     playerRank = 'MVP_PLUS_PLUS';
   }
 
-  if (playerRank === 'NONE') {
+  if (rank === 'NONE') {
     playerRank = null;
   }
   return playerRank;
@@ -178,7 +177,7 @@ function processPlayerData({
     first_login: getFirstLogin(firstLogin, _id),
     last_login: lastLogin,
     last_logout: lastLogout,
-    last_game: typeToCleanName(mostRecentGameType),
+    last_game: typeToStandardName(mostRecentGameType),
     language: userLanguage,
     gifts_sent: realBundlesGiven,
     gifts_received: realBundlesReceived,

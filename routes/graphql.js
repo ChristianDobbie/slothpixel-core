@@ -3,7 +3,7 @@
 /* eslint-disable camelcase */
 const pify = require('pify');
 const fs = require('fs');
-const { graphqlHTTP } = require('express-graphql');
+const graphqlExpress = require('express-graphql');
 const { buildSchema } = require('graphql');
 const filterObject = require('filter-obj');
 const { game_types: gameTypes } = require('hypixelconstants');
@@ -13,15 +13,14 @@ const buildBoosters = require('../store/buildBoosters');
 const buildCounts = require('../store/buildCounts');
 const buildPlayerStatus = require('../store/buildPlayerStatus');
 const { getAuctions, queryAuctionId } = require('../store/queryAuctions');
-const { buildProfileList, buildProfile } = require('../store/buildSkyBlockProfiles');
-const { buildSkyblockCalendar, buildSkyblockEvents } = require('../store/buildSkyblockCalendar');
-const buildGuild = require('../store/buildGuild');
+const { buildProfile } = require('../store/buildSkyBlockProfiles');
+const { getGuildFromPlayer, getGuildFromName } = require('../store/buildGuild');
 const leaderboards = require('../store/leaderboards');
 const redis = require('../store/redis');
 const getUUID = require('../store/getUUID');
 const { getMetadata } = require('../store/queries');
 const {
-  logger, generateJob, getData, typeToCleanName,
+  logger, generateJob, getData, typeToStandardName,
 } = require('../util/utility');
 
 const leaderboardsAsync = pify(leaderboards);
@@ -58,7 +57,9 @@ class BoostersResolver {
 }
 
 class PlayersResolver {
-  player({ player_name }) {
+  player({ player_name /* , fields */ }) {
+    // TODO: Remove 'fields' param from the /players/{player_name} route.
+    // If someone wants specific fields, they should use graphql.
     return getPlayer(player_name);
   }
 
@@ -77,15 +78,9 @@ class PlayersResolver {
     const data = await getData(redis, generateJob('recentgames', { id: uuid }).url);
 
     return data.games.map((game) => {
-      game.gameType = typeToCleanName(game.gameType);
+      game.gameType = typeToStandardName(game.gameType);
       return game;
     });
-  }
-
-  async profile({ player_name }) {
-    const uuid = await getUUID(player_name);
-    const [{ profile }] = await populatePlayers([{ uuid }]);
-    return profile;
   }
 
   async status({ player_name }) {
@@ -112,7 +107,7 @@ class SkyblockResolver {
   async profiles({ player_name }) {
     const uuid = await getUUID(player_name);
     const profiles = await redis.get(`skyblock_profiles:${uuid}`);
-    return profiles ? JSON.parse(profiles) : buildProfileList(uuid);
+    return profiles ? JSON.parse(profiles) : {};
   }
 
   async profile({ player_name, profile_id }) {
@@ -148,19 +143,9 @@ class SkyblockResolver {
     }
     return bazaar[item_id];
   }
-
-  events() {
-    return buildSkyblockEvents();
-  }
-
-  calendar({
-    events, from, to, years, stopatyearend,
-  }) {
-    return buildSkyblockCalendar(events, from, to, years, stopatyearend);
-  }
 }
 
-const graphql = graphqlHTTP({
+const graphql = graphqlExpress({
   schema: buildSchema(schema),
   graphiql: true,
   rootValue: {
@@ -180,15 +165,12 @@ const graphql = graphqlHTTP({
       return leaderboardsAsync(undefined, template);
     },
 
-    async guild({ player_name, populate_players }) {
-      const id = await getUUID(player_name).catch(() => null);
-      if (!id) throw new Error('Player not found');
-
-      return buildGuild('player', id, { shouldPopulatePlayers: populate_players });
+    guild({ player_name, populate_players }) {
+      return getGuildFromPlayer(player_name, populate_players);
     },
 
     guild_by_name({ guild_name, populate_players }) {
-      return buildGuild('name', guild_name, populate_players);
+      return getGuildFromName(guild_name, populate_players);
     },
 
     leaderboards(parameters) {
