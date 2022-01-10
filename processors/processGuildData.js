@@ -142,7 +142,7 @@ function processGuildData({
     public: publiclyListed,
     tag: guildTag,
     tag_color,
-    tag_formatted: guildTag ? `${tag_color}[${guildTag}]` : null,
+    tag_formatted: `${tag_color}[${guildTag}]`,
     legacy_ranking: legacyRanking + 1,
     exp,
     level: getLevel(exp),
